@@ -1,11 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
 project(Redis-Analog)
 
-include_directories("sources/")
+enable_testing()
 
-add_library(server STATIC sources/server.cpp)
-add_library(storage STATIC sources/storage.cpp)
-add_library(logger STATIC sources/logger.cpp)
-
-add_executable(Redis-Analog sources/main.cpp)
-
-target_link_libraries(Redis-Analog server storage logger)
+add_subdirectory(sources)
+add_subdirectory(tests)

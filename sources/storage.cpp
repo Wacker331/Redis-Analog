@@ -79,7 +79,7 @@ Elem Tree::Put(struct Elem ElemToPut)
 //Tree algorithm to delete any element by some key
 Elem Tree::Del(std::string KeyToDelete)
 {
-    TreeElem *tmpNodeCur = Root, *tmpNodePrev = NULL;
+    TreeElem* tmpNodeCur = Root, *tmpNodePrev = NULL;
     while (tmpNodeCur != NULL)
     {
         if (tmpNodeCur -> Key < KeyToDelete)
@@ -96,12 +96,29 @@ Elem Tree::Del(std::string KeyToDelete)
         {
             Elem RetElem(*tmpNodeCur);
 
-            tmpNodeCur -> DelElem(tmpNodePrev);
-            
+            if (tmpNodeCur == Root)
+                Root = tmpNodeCur -> DelNode(tmpNodePrev);
+            else 
+                tmpNodeCur = tmpNodeCur -> DelNode(tmpNodePrev);
             return RetElem;
         }
     }
     return Elem();
+}
+
+void TreeElem::Print()
+{
+    std::cout << this << ": " << "left: " << this -> Left << "; right: " << this -> Right << "; key: " << this -> Key << "; value: " << this -> Value << std::endl;
+    if (this -> Left != NULL)
+        this -> Left -> Print();
+    if (this -> Right != NULL)
+        this -> Right -> Print();
+}
+
+void Tree::Print()
+{
+    if (Root != NULL)
+        Root->Print();
 }
 
 //Initializing TreeElem by inheritated Elem class
@@ -120,35 +137,45 @@ void TreeElem::CopyData(TreeElem ElemToCopy)
     this -> Value = ElemToCopy.Value;
 }
 
-void TreeElem::DelElem(TreeElem *ParentElem)
+TreeElem *TreeElem::DelNode(TreeElem *ParentElem)
 {
     //If matched node has 0 childs
     if (this -> Right == NULL && this -> Left == NULL)
     {
-        if (ParentElem -> Left == this)
-            ParentElem -> Left = NULL;
-        else if (ParentElem -> Right == this)
-            ParentElem -> Right = NULL;
+        if (ParentElem != NULL)
+        {
+            if (ParentElem -> Left == this)
+                ParentElem -> Left = NULL;
+            else if (ParentElem -> Right == this)
+                ParentElem -> Right = NULL;
+        }
         delete this;
+        return NULL;
     }
     //If matched node has 2 childs -- replace matched node with the minimum node in the right part of tree
     else if (this -> Right != NULL && this -> Left != NULL)
     {
         TreeElem *tmpNodeRightMinPrev = this;
         TreeElem *tmpNodeRightMin = this -> Right;
+        bool LeftNodeFlag = 0;
         
         //Finding minimum node in the right part of tree
         while (tmpNodeRightMin -> Left != NULL)
         {
             tmpNodeRightMinPrev = tmpNodeRightMin;
             tmpNodeRightMin = tmpNodeRightMin -> Left;
+            LeftNodeFlag = 1;
         }
 
         this->CopyData(*tmpNodeRightMin);
 
-        delete tmpNodeRightMin;
-        tmpNodeRightMinPrev -> Left = NULL;
+        // delete tmpNodeRightMin;
+        if (LeftNodeFlag)
+            tmpNodeRightMinPrev -> Left = NULL;
+        else
+            tmpNodeRightMinPrev -> Right = NULL;
 
+        return this;
     }
     //If matched node has only 1 child
     else
@@ -159,13 +186,22 @@ void TreeElem::DelElem(TreeElem *ParentElem)
         else if (this -> Left != NULL)
             tmpNodeChild = this -> Left;
 
-        if (ParentElem -> Right == this)
-            ParentElem -> Right = tmpNodeChild;
-        else if (ParentElem -> Left == this)
-            ParentElem -> Left = tmpNodeChild;
+        std::cout << "Child: " << std::endl;
+
+        if (ParentElem != NULL)
+        {
+            if (ParentElem -> Right == this)
+                ParentElem -> Right = tmpNodeChild;
+            else if (ParentElem -> Left == this)
+                ParentElem -> Left = tmpNodeChild;
+        }
         
         delete this;
+        return tmpNodeChild;
     }
+
+    //Error
+    return NULL;
 }
 
 //Initialising empty Elem object
@@ -173,6 +209,12 @@ Elem::Elem()
 {
     this -> Key = "";
     this -> Value = "";
+}
+
+Elem::Elem(std::string KeyToInit, std::string ValueToInit)
+{
+    this -> Key = KeyToInit;
+    this -> Value = ValueToInit;
 }
 
 //Initialising Elem with ElemTree object
