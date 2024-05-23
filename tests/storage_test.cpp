@@ -110,8 +110,14 @@ TEST(TreeTests, BigTreeTest)
     RetElem = MainTree.Put(Elem("ghi", "value7"));
     ASSERT_EQ(RetElem.Value, "");
 
-    RetElem = MainTree.Get("bcd");
+    RetElem = MainTree.Put(Elem("bcd", "value10"));
     ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainTree.Get("bcd");
+    ASSERT_EQ(RetElem.Value, "value10");
+
+    RetElem = MainTree.Get("ghi");
+    ASSERT_EQ(RetElem.Value, "value7");
 
     RetElem = MainTree.Del("def");
     ASSERT_EQ(RetElem.Value, "value4");

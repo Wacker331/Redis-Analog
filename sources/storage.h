@@ -31,9 +31,6 @@ public:
 
 class Elem
 {
-//     friend class TreeElem;
-//     friend class Tree;
-// protected:
 public:
     std::string Key;
     std::string Value;
@@ -62,7 +59,6 @@ class Tree : public StorageInterface
 
 public:
     Tree();
-    // ~Tree();
 
     Elem Get(std::string) override;
     Elem Put(struct Elem) override;
