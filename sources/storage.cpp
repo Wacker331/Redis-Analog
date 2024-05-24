@@ -1,5 +1,30 @@
 #include "storage.h"
 
+Storage::Storage(StorageInterface &StorageStructure) : StorageInstance(StorageStructure)
+{
+    CountElems = 0;
+}
+
+Elem Storage::Put(std::string KeyToPut, std::string ValueToPut) 
+{
+    return Storage::Put(Elem(KeyToPut, ValueToPut));
+}
+
+Elem Storage::Put(Elem ElemToPut)
+{
+    return StorageInstance.Put(ElemToPut);
+}
+
+Elem Storage::Del(std::string KeyToDel)
+{
+    return StorageInstance.Del(KeyToDel);
+}
+
+Elem Storage::operator[](std::string KeyToGet)
+{
+    return StorageInstance.Get(KeyToGet);
+}
+
 //Initialising empty Elem object
 Elem::Elem()
 {

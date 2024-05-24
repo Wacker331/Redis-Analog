@@ -127,6 +127,110 @@ TEST(TreeTests, BigTreeTest)
 
 }
 
+TEST(StorageTest, SummaryTest)
+{
+    Tree MainTree;
+    Storage MainStorage(MainTree);
+    Elem RetElem, ElemToPut("key1", "value1");
+
+    ASSERT_EQ(MainStorage["Key"].Value, "");
+    ASSERT_EQ(MainStorage["Key"].Key, "");
+
+    RetElem = MainStorage.Put(ElemToPut);
+    ASSERT_EQ(RetElem.Value, "");
+    ASSERT_EQ(RetElem.Key, "");
+
+    RetElem = MainStorage.Put(ElemToPut);
+    ASSERT_EQ(RetElem.Key, "key1");
+    ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainStorage.Del("key1");
+    ASSERT_EQ(RetElem.Key, "key1");
+    ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainStorage["key1"];
+    ASSERT_EQ(RetElem.Key, "");
+    ASSERT_EQ(RetElem.Value, "");
+
+    RetElem = MainStorage.Put(Elem("abc", "value1"));
+    RetElem = MainStorage.Put(Elem("bcd", "value2"));
+    ASSERT_EQ(RetElem.Key, "");
+    ASSERT_EQ(RetElem.Value, "");
+
+    RetElem = MainStorage.Del("bcd");
+    ASSERT_EQ(RetElem.Key, "bcd");
+    ASSERT_EQ(RetElem.Value, "value2");
+
+    RetElem = MainStorage["abc"];
+    ASSERT_EQ(RetElem.Key, "abc");
+    ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainStorage["bcd"];
+    ASSERT_EQ(RetElem.Key, "");
+    ASSERT_EQ(RetElem.Value, "");
+
+}
+
+TEST(StorageTest, SummaryTest2)
+{
+    Tree MainTree;
+    Storage MainStorage(MainTree);
+    Elem RetElem;
+
+    RetElem = MainStorage.Put(Elem("bcd", "value1"));
+    ASSERT_EQ(RetElem.Key, "");
+    RetElem = MainStorage.Put(Elem("abc", "value2"));
+    ASSERT_EQ(RetElem.Key, "");
+    RetElem = MainStorage.Put(Elem("cde", "value3"));
+    ASSERT_EQ(RetElem.Key, "");
+
+    RetElem = MainStorage.Del("bcd");
+    ASSERT_EQ(RetElem.Key, "bcd");
+    ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainStorage["bcd"];
+    ASSERT_EQ(RetElem.Key, "");
+    ASSERT_EQ(RetElem.Value, "");
+
+    RetElem = MainStorage["abc"];
+    ASSERT_EQ(RetElem.Key, "abc");
+    ASSERT_EQ(RetElem.Value, "value2");
+
+    RetElem = MainStorage["cde"];
+    ASSERT_EQ(RetElem.Key, "cde");
+    ASSERT_EQ(RetElem.Value, "value3");
+
+    RetElem = MainStorage.Put(Elem("bcd", "value1"));
+    ASSERT_EQ(RetElem.Value, "");
+    RetElem = MainStorage.Put(Elem("abc", "value22"));
+    ASSERT_EQ(RetElem.Value, "value2");
+    RetElem = MainStorage.Put(Elem("cde", "value33"));
+    ASSERT_EQ(RetElem.Value, "value3");
+    RetElem = MainStorage.Put(Elem("def", "value4"));
+    ASSERT_EQ(RetElem.Value, "");
+    RetElem = MainStorage.Put(Elem("efg", "value5"));
+    ASSERT_EQ(RetElem.Value, "");
+    RetElem = MainStorage.Put(Elem("fgh", "value6"));
+    ASSERT_EQ(RetElem.Value, "");
+    RetElem = MainStorage.Put(Elem("ghi", "value7"));
+    ASSERT_EQ(RetElem.Value, "");
+
+    RetElem = MainStorage.Put(Elem("bcd", "value10"));
+    ASSERT_EQ(RetElem.Value, "value1");
+
+    RetElem = MainStorage["bcd"];
+    ASSERT_EQ(RetElem.Value, "value10");
+
+    RetElem = MainStorage["ghi"];
+    ASSERT_EQ(RetElem.Value, "value7");
+
+    RetElem = MainStorage.Del("def");
+    ASSERT_EQ(RetElem.Value, "value4");
+
+    RetElem = MainStorage["def"];
+    ASSERT_EQ(RetElem.Value, "");
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

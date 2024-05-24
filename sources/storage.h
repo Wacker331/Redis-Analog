@@ -6,25 +6,28 @@ class Elem;
 
 class StorageInterface
 {
+public:
     virtual Elem Get(std::string) = 0;
     virtual Elem Put(struct Elem) = 0;
     virtual Elem Del(std::string) = 0;
 
+    // StorageInterface();
 };
 
 class Storage
 {
     int CountElems;
-    // StorageInterface &StorageInstance;
+    StorageInterface &StorageInstance;
 
 public:
-    // Storage(StorageInterface&);
+    Storage(StorageInterface&);
     // ~Storage();
 
     // Elem* Get(std::string );
-    // bool Put(std::string, std::string);
-    // bool Del(std::string);
-    // Elem& operator[](std::string);
+    Elem Put(std::string, std::string);
+    Elem Put(Elem);
+    Elem Del(std::string);
+    Elem operator[](std::string);
 
 };
 
