@@ -29,6 +29,8 @@ public:
     Elem Del(std::string);
     Elem operator[](std::string);
 
+    void Dump(std::string);
+
 };
 
 
