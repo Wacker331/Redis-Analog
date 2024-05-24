@@ -1,10 +1,30 @@
 #include <gtest/gtest.h>
 #include "../sources/logger.h"
 
-TEST(LoggerTests, Output)
+void LoggerMainThread(Logger *MainLogger)
 {
-    Logger MainLogger;
-    MainLogger << std::string("Hello");
+    MainLogger -> LoggerMainThread();
+}
+
+TEST(LoggerTests, OneThread)
+{
+    Logger MainLogger("TestLogs");
+    // MainLogger.LoggerMainThread();
+    MainLogger << "Hello";
+    MainLogger << "test";
+    MainLogger << "Protei";
+    MainLogger.LoggerMainThread();
+}
+
+TEST(LoggerTests, TwoThreads)
+{
+    Logger MainLogger("TestLogs");
+    // MainLogger.LoggerMainThread();
+    std::thread Thread1(LoggerMainThread, &MainLogger);
+    MainLogger << "Hello";
+    MainLogger << "test";
+    MainLogger << "Protei";
+    Thread1.join();
 }
 
 int main(int argc, char **argv)

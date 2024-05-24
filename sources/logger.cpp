@@ -20,6 +20,7 @@ Logger::Logger(std::string InputFileName)
     //Clear previous file
     outFile.open(FileName, std::ios::out);
     outFile.close();
+    *this << "Logger inited";
 }
 
 Logger& Logger::operator<<(LogMessage InputLog)
@@ -37,6 +38,7 @@ Logger& Logger::operator<<(std::string InputMsg)
 
 void Logger::LoggerMainThread()
 {
+    outFile.open(FileName, std::ios::app);
     while(1)
     {
         if (!LogSemaphore.try_acquire())
@@ -45,7 +47,7 @@ void Logger::LoggerMainThread()
             LogSemaphore.acquire();
             outFile.open(FileName, std::ios::app);
         }
-        if (!LogQueue.empty())
+        if (!LogQueue.empty() && outFile.is_open())
         {
             LogMessage Current = LogQueue.front();
 
@@ -64,7 +66,7 @@ void Logger::LoggerMainThread()
             else if (Current.Level == DEBUG)
                 outFile << "[DEBUG]";
             outFile << " " << Current.Message << std::endl;
-            
+
             LogQueue.pop();
         }
     }
