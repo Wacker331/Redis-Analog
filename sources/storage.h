@@ -1,4 +1,7 @@
+#ifndef STORAGE_H
+#define STORAGE_H
 #include <iostream>
+#include <mutex>
 
 class TreeElem;
 class Tree;
@@ -18,6 +21,7 @@ class Storage
 {
     int CountElems;
     StorageInterface &StorageInstance;
+    std::mutex Mutex;
 
 public:
     Storage(StorageInterface&);
@@ -27,6 +31,7 @@ public:
     Elem Put(std::string, std::string);
     Elem Put(Elem);
     Elem Del(std::string);
+    Elem GetCount();
     Elem operator[](std::string);
 
     void Dump(std::string);
@@ -70,3 +75,5 @@ public:
     Elem Del(std::string) override;
     void Print();
 };
+
+#endif

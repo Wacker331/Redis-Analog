@@ -1,4 +1,8 @@
 #include "logger.h"
+void InitLogger(Logger* Logs)
+{
+    Logs -> LoggerMainThread();
+}
 
 LogMessage::LogMessage(LogLevel InputLevel, std::string InputMsg)
 {
@@ -21,6 +25,8 @@ Logger::Logger(std::string InputFileName)
     outFile.open(FileName, std::ios::out);
     outFile.close();
     *this << "Logger inited";
+
+    // std::thread Thread(InitLogger, this);
 }
 
 Logger& Logger::operator<<(LogMessage InputLog)

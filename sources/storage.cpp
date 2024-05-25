@@ -12,17 +12,38 @@ Elem Storage::Put(std::string KeyToPut, std::string ValueToPut)
 
 Elem Storage::Put(Elem ElemToPut)
 {
-    return StorageInstance.Put(ElemToPut);
+    Mutex.lock();
+    Elem RetElem = StorageInstance.Put(ElemToPut);
+    if (RetElem.Key == "")
+        CountElems++;
+    Mutex.unlock();
+    return RetElem;
 }
 
 Elem Storage::Del(std::string KeyToDel)
 {
-    return StorageInstance.Del(KeyToDel);
+    Mutex.lock();
+    Elem RetElem = StorageInstance.Del(KeyToDel);
+    if (RetElem.Key != "")
+        CountElems--;
+    Mutex.unlock();
+    return RetElem;
 }
 
 Elem Storage::operator[](std::string KeyToGet)
 {
-    return StorageInstance.Get(KeyToGet);
+    Mutex.lock();
+    Elem RetElem = StorageInstance.Get(KeyToGet);
+    Mutex.unlock();
+    return RetElem;
+}
+
+Elem Storage::GetCount()
+{
+    Mutex.lock();
+    Elem RetElem("", std::to_string(CountElems));
+    Mutex.unlock();
+    return RetElem;
 }
 
 //Initialising empty Elem object

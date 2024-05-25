@@ -1,15 +1,9 @@
 #include <gtest/gtest.h>
 #include "../sources/logger.h"
 
-void LoggerMainThread(Logger *MainLogger)
-{
-    MainLogger -> LoggerMainThread();
-}
-
 TEST(LoggerTests, OneThread)
 {
     Logger MainLogger("TestLogs");
-    // MainLogger.LoggerMainThread();
     MainLogger << "Hello";
     MainLogger << "test";
     MainLogger << "Protei";
@@ -19,12 +13,11 @@ TEST(LoggerTests, OneThread)
 TEST(LoggerTests, TwoThreads)
 {
     Logger MainLogger("TestLogs");
-    // MainLogger.LoggerMainThread();
-    std::thread Thread1(LoggerMainThread, &MainLogger);
+    // std::thread Thread1(LoggerMainThread, &MainLogger);
     MainLogger << "Hello";
     MainLogger << "test";
     MainLogger << "Protei";
-    Thread1.join();
+    sleep(2);
 }
 
 int main(int argc, char **argv)

@@ -1,13 +1,14 @@
 #include <iostream>
+#include "logger.h"
+#include "server.h"
+#include "storage.h"
 
 int main()
 {
-    // Получение текущего времени
-    time_t now = time(nullptr);
-    struct tm* timeinfo;
-    timeinfo = localtime(&now);
-    char buffer[80];
-    strftime(buffer, 80, "Сейчас: %d.%m.%Y %H:%M:%S", timeinfo);
+    Tree MainTree;
+    Storage MainStorage(MainTree);
+    Logger MainLogger("Logs");
+    int port = 9001;
+    Server MainServer(port, MainStorage, MainLogger);
 
-    std::cout << buffer << std::endl;
 }

@@ -1,3 +1,5 @@
+#ifndef LOGGER_H
+#define LOGGER_H
 #include <iostream>
 #include <fstream>
 #include <queue>
@@ -25,6 +27,7 @@ public:
     LogMessage(LogLevel, std::string);
 };
 
+
 class Logger
 {
     std::ofstream outFile;
@@ -41,3 +44,7 @@ public:
     Logger& operator<<(LogMessage);
     Logger& operator<<(std::string);
 };
+
+void InitLogger(Logger *Logs);
+
+#endif
