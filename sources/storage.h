@@ -2,6 +2,7 @@
 #define STORAGE_H
 #include <iostream>
 #include <mutex>
+#include <fstream>
 
 class TreeElem;
 class Tree;
@@ -13,8 +14,11 @@ public:
     virtual Elem Get(std::string) = 0;
     virtual Elem Put(struct Elem) = 0;
     virtual Elem Del(std::string) = 0;
+    virtual void Dump(std::ofstream&)
+    {
+        std::cout << "Dump not initialised" << std::endl;
+    }
 
-    // StorageInterface();
 };
 
 class Storage
@@ -27,7 +31,6 @@ public:
     Storage(StorageInterface&);
     // ~Storage();
 
-    // Elem* Get(std::string );
     Elem Put(std::string, std::string);
     Elem Put(Elem);
     Elem Del(std::string);
@@ -35,6 +38,8 @@ public:
     Elem operator[](std::string);
 
     void Dump(std::string);
+    void ReadDump(std::string);
+    Elem ParseDumpLine(std::ifstream&);
 
 };
 
@@ -60,6 +65,7 @@ public:
     TreeElem* Right;
 
     TreeElem(Elem);
+    void Dump(std::ofstream&);
     void Print();
 };
 
@@ -73,6 +79,7 @@ public:
     Elem Get(std::string) override;
     Elem Put(struct Elem) override;
     Elem Del(std::string) override;
+    void Dump(std::ofstream&) override;
     void Print();
 };
 

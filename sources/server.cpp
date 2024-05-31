@@ -152,7 +152,8 @@ int Client::RequestHandler(char* buffer)
     }
     else if (Arguments[0] == "DUMP")
     {
-        //To be continued;
+        if (Arguments.size() >= 2)
+            MainStorage.Dump(Arguments[1]);
     }
     strcpy(buffer, (AnswerStr + " " + RetElem.Value + "\n").c_str());
     return 0;

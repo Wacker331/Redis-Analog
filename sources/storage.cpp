@@ -38,6 +38,55 @@ Elem Storage::operator[](std::string KeyToGet)
     return RetElem;
 }
 
+void Storage::Dump(std::string filename)
+{
+    std::ofstream OutputFile;
+
+    Mutex.lock();
+    OutputFile.open(filename, std::ios::out);
+
+    if (OutputFile.is_open())
+        StorageInstance.Dump(OutputFile);
+
+    OutputFile.close();
+    Mutex.unlock();
+}
+
+void Storage::ReadDump(std::string filename)
+{
+    std::ifstream InputFile;
+    InputFile.open(filename, std::ios::in);
+    Elem NewElem;
+
+    while(1)
+    {
+        NewElem = ParseDumpLine(InputFile);
+        if (NewElem.Key == "")
+            break;
+        Put(NewElem);
+    }
+
+}
+
+Elem Storage::ParseDumpLine(std::ifstream& InputFile)
+{
+    std::string Line, InputKey, InputValue;
+
+    std::getline(InputFile, Line);
+
+    size_t SeparatorPos = Line.find(":");
+    if (SeparatorPos == std::string::npos) 
+    {
+        std::cout << "Invalid line in DUMP" << std::endl;
+        return Elem();
+    }
+
+    InputKey = Line.substr(1, SeparatorPos - 2);
+    InputValue = Line.substr(SeparatorPos + 3, Line.length() - (SeparatorPos + 3) - 1);
+
+    return Elem(InputKey, InputValue);
+}
+
 Elem Storage::GetCount()
 {
     Mutex.lock();
@@ -150,6 +199,15 @@ TreeElem::TreeElem(Elem ElemToInit)
 
     this->Right = NULL;
     this->Left = NULL;
+}
+
+void TreeElem::Dump(std::ofstream& OutFile)
+{
+    OutFile << "\"" << this -> Key << "\": \"" << this -> Value << "\"" << std::endl;
+    if (this -> Left != NULL)
+        this -> Left -> Dump(OutFile);
+    if (this -> Right != NULL)
+        this -> Right -> Dump(OutFile);
 }
 
 //Recursive print of data tree (for debugging)
@@ -269,6 +327,12 @@ Elem Tree::Del(std::string KeyToDelete)
         }
     }
     return Elem();
+}
+
+void Tree::Dump(std::ofstream& OutFile)
+{
+    if (Root != NULL)
+        Root -> Dump(OutFile);
 }
 
 //Print tree (for debugging)
