@@ -15,7 +15,7 @@ LogMessage::LogMessage(LogLevel InputLevel, std::string InputMsg)
 
 Logger::Logger() : Logger::Logger("RedisLogs")
 {
-
+    
 }
 
 Logger::Logger(std::string InputFileName)
@@ -63,7 +63,9 @@ void Logger::LoggerMainThread()
 
             outFile << buffer;
             outFile << Current.PID << "." << Current.TID << "] ";
-            if (Current.Level == ERROR)
+            if (Current.Level == CRITICAL)
+                outFile << "[CRITICAL]";
+            else if (Current.Level == ERROR)
                 outFile << "[ERROR]";
             else if (Current.Level == WARNING)
                 outFile << "[WARN ]";

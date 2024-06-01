@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <thread>
 #include <cstring>
 
@@ -16,9 +17,9 @@ class Server
     Logger &Logs;
     Storage& MainStorage;
     int AcceptSock;
-    int MaxConnections, CurrentConnections;
+    int MaxConnections;//, CurrentConnections;
 public:
-    Server(int, Storage&, Logger&);
+    Server(int, Storage&, Logger&, int);
     ~Server();
     void ServerMainThread();
 };

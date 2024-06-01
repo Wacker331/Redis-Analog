@@ -50,15 +50,6 @@ TEST(ClientTests, HandlerTest)
     ASSERT_EQ(std::string(buffer), "NE");
 }
 
-// TEST(ServerTests, MainServerTest)
-// {
-//     Tree MainTree;
-//     Storage MainStorage(MainTree);
-//     Logger MainLogger;
-//     int port = 9000;
-//     Server MainServer(port, MainStorage, MainLogger);
-// }
-
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

@@ -1,15 +1,18 @@
 #include "storage.h"
 
+//Inits storage class
 Storage::Storage(StorageInterface &StorageStructure) : StorageInstance(StorageStructure)
 {
     CountElems = 0;
 }
 
+//Puts element by providing only "key" and "value"
 Elem Storage::Put(std::string KeyToPut, std::string ValueToPut) 
 {
     return Storage::Put(Elem(KeyToPut, ValueToPut));
 }
 
+//Puts Elem class to storage
 Elem Storage::Put(Elem ElemToPut)
 {
     Mutex.lock();
@@ -20,6 +23,7 @@ Elem Storage::Put(Elem ElemToPut)
     return RetElem;
 }
 
+//Deletes element in storage by "key"
 Elem Storage::Del(std::string KeyToDel)
 {
     Mutex.lock();
@@ -30,6 +34,7 @@ Elem Storage::Del(std::string KeyToDel)
     return RetElem;
 }
 
+//Gets element by "key" and returns Elem class
 Elem Storage::operator[](std::string KeyToGet)
 {
     Mutex.lock();
@@ -38,6 +43,7 @@ Elem Storage::operator[](std::string KeyToGet)
     return RetElem;
 }
 
+//Dumps the whole storage to file named "filename"
 void Storage::Dump(std::string filename)
 {
     std::ofstream OutputFile;
@@ -52,6 +58,7 @@ void Storage::Dump(std::string filename)
     Mutex.unlock();
 }
 
+//Reads the "filename" and provide elements to storage
 void Storage::ReadDump(std::string filename)
 {
     std::ifstream InputFile;
@@ -68,6 +75,7 @@ void Storage::ReadDump(std::string filename)
 
 }
 
+//Parses exact line, divides data and creates Elem structure
 Elem Storage::ParseDumpLine(std::ifstream& InputFile)
 {
     std::string Line, InputKey, InputValue;
@@ -77,7 +85,6 @@ Elem Storage::ParseDumpLine(std::ifstream& InputFile)
     size_t SeparatorPos = Line.find(":");
     if (SeparatorPos == std::string::npos) 
     {
-        std::cout << "Invalid line in DUMP" << std::endl;
         return Elem();
     }
 
@@ -87,6 +94,7 @@ Elem Storage::ParseDumpLine(std::ifstream& InputFile)
     return Elem(InputKey, InputValue);
 }
 
+//Returns Elem class instance with number of elements in storage in "Value" field
 Elem Storage::GetCount()
 {
     Mutex.lock();
@@ -201,6 +209,7 @@ TreeElem::TreeElem(Elem ElemToInit)
     this->Left = NULL;
 }
 
+//Recursive write element by element in file for "DUMP" command
 void TreeElem::Dump(std::ofstream& OutFile)
 {
     OutFile << "\"" << this -> Key << "\": \"" << this -> Value << "\"" << std::endl;
@@ -329,6 +338,7 @@ Elem Tree::Del(std::string KeyToDelete)
     return Elem();
 }
 
+//Inits the "DUMP" process in Tree structure
 void Tree::Dump(std::ofstream& OutFile)
 {
     if (Root != NULL)

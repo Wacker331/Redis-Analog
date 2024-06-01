@@ -1,12 +1,23 @@
 #include "server.h"
 
+//Global variable to track connection's number
+int CurrentConnections = 0;
+std::mutex MutexCurrentConnections;
+
+//Function for std::thread to init Client thread
 void InitClient(Client *NewClient)
 {
     NewClient -> ClientMainThread();
+    MutexCurrentConnections.lock();
+    CurrentConnections--;
+    MutexCurrentConnections.unlock();
 }
 
-Server::Server(int Port, Storage& InputStorage, Logger& InputLogger) : MainStorage(InputStorage), Logs(InputLogger)
+//Init and bind server to listening socket
+Server::Server(int Port, Storage& InputStorage, Logger& InputLogger, int MaxClients) : MainStorage(InputStorage), Logs(InputLogger)
 {
+    MaxConnections = MaxClients;
+    CurrentConnections = 0;
     struct sockaddr_in Address;
     int AddrLen = sizeof(Address);
 
@@ -22,17 +33,21 @@ Server::Server(int Port, Storage& InputStorage, Logger& InputLogger) : MainStora
 
     if (bind(AcceptSock, (struct sockaddr *)&Address, AddrLen) < 0) 
     {
-        std::cout << "Can't bind socket" << std::endl;
+        std::cout << "Can't bind socket on " << Port << " port" << std::endl;
         return;
     }
+    std::cout << "Server started on " << Port << " port" << std::endl;
+    Logs << "Server started on " + std::to_string(Port) + " port";
     ServerMainThread();
 }
 
+//Close listening socket
 Server::~Server()
 {
     close(AcceptSock);
 }
 
+//Main thread of server. Listening, accepting connections and creating client's threads.
 void Server::ServerMainThread()
 {
     int NewConnection;
@@ -41,36 +56,60 @@ void Server::ServerMainThread()
 
     while (1)
     {
-        if (listen(AcceptSock, 3) < 0)
+        if (listen(AcceptSock, MaxConnections + 1) < 0)
         {
-            Logs << LogMessage(DEBUG, "Listen error");
+            Logs << LogMessage(CRITICAL, "Listen error");
             return;
         }
-        if ((NewConnection = accept(AcceptSock, (struct sockaddr *)&Address, (socklen_t*)&AddrLen)) < 0) 
+        else 
         {
-            Logs << LogMessage(DEBUG, "Socket accept error");
-            return;
+            MutexCurrentConnections.lock();
+            if (CurrentConnections < MaxConnections)
+            {
+                MutexCurrentConnections.unlock();
+                if ((NewConnection = accept(AcceptSock, (struct sockaddr *)&Address, (socklen_t*)&AddrLen)) < 0) 
+                {
+                    Logs << LogMessage(ERROR, "Socket accept error");
+                }
+                else
+                {
+                    char TextAddress[INET_ADDRSTRLEN];
+                    inet_ntop(AF_INET, &Address.sin_addr, TextAddress, INET_ADDRSTRLEN);
+                    Logs << LogMessage(INFO, std::string("New connection from ") + TextAddress + ":" + std::to_string(ntohs(Address.sin_port)));
+
+                    MutexCurrentConnections.lock();
+                    CurrentConnections++;
+                    if (CurrentConnections == MaxConnections)
+                        Logs << LogMessage(WARNING, "Connections number reached it's maximum");
+                    MutexCurrentConnections.unlock();
+
+                    Client *NewClient = new Client(NewConnection, Address, MainStorage, Logs);
+                    std::thread *ClientThread = new std::thread(InitClient, NewClient);
+                }
+            }
+            else
+            {
+                MutexCurrentConnections.unlock();
+            }
         }
-        Client *NewClient = new Client(NewConnection, Address, MainStorage, Logs);
-        std::thread *ClientThread = new std::thread(InitClient, NewClient);
     }
 }
 
+//Inits Client class with exact socket
 Client::Client(int InputSocket, struct sockaddr_in InputAddress, Storage& InputStorage, Logger& InputLogger) \
 : MainStorage(InputStorage), Logs(InputLogger)
 {
     Socket = InputSocket;
     Address = InputAddress;
-
-    // std::thread(InitClient, this);
-    // this -> ClientMainThread();
 }
 
+//Closes client socket
 Client::~Client()
 {
     close(Socket);
 }
 
+//Parsing input string to arguments by ' '
 std::vector<std::string> Client::ParseInput(char* buffer)
 {
     std::vector<std::string> RetVector;
@@ -93,6 +132,7 @@ std::vector<std::string> Client::ParseInput(char* buffer)
     return RetVector;
 }
 
+//Handling requests from clientside and creates answer
 int Client::RequestHandler(char* buffer)
 {
     Elem RetElem;
@@ -153,12 +193,23 @@ int Client::RequestHandler(char* buffer)
     else if (Arguments[0] == "DUMP")
     {
         if (Arguments.size() >= 2)
+        {
             MainStorage.Dump(Arguments[1]);
+            Logs << "Storage was dumped";
+        }
+
+    }
+    else 
+    {
+        Logs << LogMessage(WARNING, std::string("Wrong command receieved") + buffer);
+        AnswerStr = "";
+        RetElem.Value = "";
     }
     strcpy(buffer, (AnswerStr + " " + RetElem.Value + "\n").c_str());
     return 0;
 }
 
+//Main thread for client. Just receiving buffer and provide it to handler
 void Client::ClientMainThread()
 {
     char buffer[512];
@@ -172,4 +223,7 @@ void Client::ClientMainThread()
             send(Socket, buffer, 512, 0);
         }
     }
+    char TextAddress[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &Address.sin_addr, TextAddress, INET_ADDRSTRLEN);
+    Logs << LogMessage(INFO, std::string("Client ") + TextAddress + ":" + std::to_string(ntohs(Address.sin_port)) + " disconnected");
 }
