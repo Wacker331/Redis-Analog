@@ -10,32 +10,35 @@
 #include "logger.h"
 #include "storage.h"
 
-#define DEFAULT_CONNECTION_MAX 10
-
+//Server class with storage, logger and main socket
 class Server
 {
     Logger &Logs;
     Storage& MainStorage;
     int AcceptSock;
-    int MaxConnections;//, CurrentConnections;
+    int MaxConnections;
 public:
-    Server(int, Storage&, Logger&, int);
+    Server(const int, Storage&,  Logger&, const int);
     ~Server();
     void ServerMainThread();
 };
 
+//Client class with storage, logs, socket and clients' address
 class Client
 {
     int Socket;
     struct sockaddr_in Address;
     Storage& MainStorage;
     Logger& Logs;
-public:
+    friend class Client_Test;
+protected:
     int RequestHandler(char*);
     std::vector<std::string> ParseInput(char*);
-    Client(int, struct sockaddr_in, Storage&, Logger&);
+public:
+    Client(const int, const struct sockaddr_in, Storage&, Logger&);
     ~Client();
     void ClientMainThread();
+
 };
 
 #endif

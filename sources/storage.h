@@ -8,6 +8,7 @@ class TreeElem;
 class Tree;
 class Elem;
 
+//Abstract class (interface) needed to easily replace the internal storage data structure
 class StorageInterface
 {
 public:
@@ -21,66 +22,69 @@ public:
 
 };
 
+//Storage class for server
 class Storage
 {
     int CountElems;
-    StorageInterface &StorageInstance;
+    StorageInterface &StorageStructure;
     std::mutex Mutex;
 
+    Elem ParseDumpLine(std::ifstream&);
 public:
     Storage(StorageInterface&);
-    // ~Storage();
 
-    Elem Put(std::string, std::string);
-    Elem Put(Elem);
-    Elem Del(std::string);
+    Elem Put(const std::string, const std::string);
+    Elem Put(const Elem);
+    Elem Del(const std::string);
     Elem GetCount();
-    Elem operator[](std::string);
+    Elem operator[](const std::string);
 
-    void Dump(std::string);
-    void ReadDump(std::string);
-    Elem ParseDumpLine(std::ifstream&);
-
+    void Dump(const std::string);
+    void ReadDump(const std::string);
 };
 
-
+//Element in storage data structure
 class Elem
 {
 public:
     std::string Key;
     std::string Value;
     Elem();
-    Elem(std::string, std::string);
-    Elem(TreeElem);
+    Elem(const std::string, const std::string);
+    Elem(const TreeElem);
 };
 
+//Element in binary tree data structure
 class TreeElem : public Elem
 {
     friend class Tree;
 protected:
-    void CopyData(TreeElem);
+    void CopyData(const TreeElem);
     TreeElem* DelNode(TreeElem*);
-public:
-    TreeElem* Left;
-    TreeElem* Right;
-
-    TreeElem(Elem);
     void Dump(std::ofstream&);
     void Print();
+    TreeElem* Left;
+    TreeElem* Right;
+public:
+    TreeElem(const Elem);
 };
 
+//Tree data structure for "Storage" that can be easily replaced to another data structure with "StorageInterface"
 class Tree : public StorageInterface
 {
     TreeElem* Root;
 
-public:
-    Tree();
-
-    Elem Get(std::string) override;
-    Elem Put(struct Elem) override;
-    Elem Del(std::string) override;
+    friend class Storage;
+    friend class Tree_Test;
+protected:
+    Elem Get(const std::string) override;
+    Elem Put(const struct Elem) override;
+    Elem Del(const std::string) override;
     void Dump(std::ofstream&) override;
     void Print();
+
+public:
+    Tree();
 };
 
 #endif

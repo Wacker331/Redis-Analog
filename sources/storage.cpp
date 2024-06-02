@@ -1,22 +1,22 @@
 #include "storage.h"
 
 //Inits storage class
-Storage::Storage(StorageInterface &StorageStructure) : StorageInstance(StorageStructure)
+Storage::Storage(StorageInterface &StorageStructure) : StorageStructure(StorageStructure)
 {
     CountElems = 0;
 }
 
 //Puts element by providing only "key" and "value"
-Elem Storage::Put(std::string KeyToPut, std::string ValueToPut) 
+Elem Storage::Put(const std::string KeyToPut, const std::string ValueToPut) 
 {
     return Storage::Put(Elem(KeyToPut, ValueToPut));
 }
 
 //Puts Elem class to storage
-Elem Storage::Put(Elem ElemToPut)
+Elem Storage::Put(const Elem ElemToPut)
 {
     Mutex.lock();
-    Elem RetElem = StorageInstance.Put(ElemToPut);
+    Elem RetElem = StorageStructure.Put(ElemToPut);
     if (RetElem.Key == "")
         CountElems++;
     Mutex.unlock();
@@ -24,27 +24,36 @@ Elem Storage::Put(Elem ElemToPut)
 }
 
 //Deletes element in storage by "key"
-Elem Storage::Del(std::string KeyToDel)
+Elem Storage::Del(const std::string KeyToDel)
 {
     Mutex.lock();
-    Elem RetElem = StorageInstance.Del(KeyToDel);
+    Elem RetElem = StorageStructure.Del(KeyToDel);
     if (RetElem.Key != "")
         CountElems--;
     Mutex.unlock();
     return RetElem;
 }
 
-//Gets element by "key" and returns Elem class
-Elem Storage::operator[](std::string KeyToGet)
+//Returns Elem class instance with number of elements in storage in "Value" field
+Elem Storage::GetCount()
 {
     Mutex.lock();
-    Elem RetElem = StorageInstance.Get(KeyToGet);
+    Elem RetElem("", std::to_string(CountElems));
+    Mutex.unlock();
+    return RetElem;
+}
+
+//Gets element by "key" and returns Elem class
+Elem Storage::operator[](const std::string KeyToGet)
+{
+    Mutex.lock();
+    Elem RetElem = StorageStructure.Get(KeyToGet);
     Mutex.unlock();
     return RetElem;
 }
 
 //Dumps the whole storage to file named "filename"
-void Storage::Dump(std::string filename)
+void Storage::Dump(const std::string filename)
 {
     std::ofstream OutputFile;
 
@@ -52,14 +61,14 @@ void Storage::Dump(std::string filename)
     OutputFile.open(filename, std::ios::out);
 
     if (OutputFile.is_open())
-        StorageInstance.Dump(OutputFile);
+        StorageStructure.Dump(OutputFile);
 
     OutputFile.close();
     Mutex.unlock();
 }
 
 //Reads the "filename" and provide elements to storage
-void Storage::ReadDump(std::string filename)
+void Storage::ReadDump(const std::string filename)
 {
     std::ifstream InputFile;
     InputFile.open(filename, std::ios::in);
@@ -94,15 +103,6 @@ Elem Storage::ParseDumpLine(std::ifstream& InputFile)
     return Elem(InputKey, InputValue);
 }
 
-//Returns Elem class instance with number of elements in storage in "Value" field
-Elem Storage::GetCount()
-{
-    Mutex.lock();
-    Elem RetElem("", std::to_string(CountElems));
-    Mutex.unlock();
-    return RetElem;
-}
-
 //Initialising empty Elem object
 Elem::Elem()
 {
@@ -111,21 +111,21 @@ Elem::Elem()
 }
 
 //Initialising Elem class with data strings (mostly for testing)
-Elem::Elem(std::string KeyToInit, std::string ValueToInit)
+Elem::Elem(const std::string KeyToInit, const std::string ValueToInit)
 {
     this -> Key = KeyToInit;
     this -> Value = ValueToInit;
 }
 
 //Initialising Elem with ElemTree object
-Elem::Elem(TreeElem ElemToInit)
+Elem::Elem(const TreeElem ElemToInit)
 {
     this -> Key = ElemToInit.Key;
     this -> Value = ElemToInit.Value;
 }
 
 //Copy only data fields of node
-void TreeElem::CopyData(TreeElem ElemToCopy)
+void TreeElem::CopyData(const TreeElem ElemToCopy)
 {
     this -> Key = ElemToCopy.Key;
     this -> Value = ElemToCopy.Value;
@@ -199,16 +199,6 @@ TreeElem *TreeElem::DelNode(TreeElem *ParentElem)
     return NULL;
 }
 
-//Initializing TreeElem by inheritated Elem class
-TreeElem::TreeElem(Elem ElemToInit)
-{
-    this->Key = ElemToInit.Key;
-    this->Value = ElemToInit.Value;
-
-    this->Right = NULL;
-    this->Left = NULL;
-}
-
 //Recursive write element by element in file for "DUMP" command
 void TreeElem::Dump(std::ofstream& OutFile)
 {
@@ -229,6 +219,16 @@ void TreeElem::Print()
         this -> Right -> Print();
 }
 
+//Initializing TreeElem by inheritated Elem class
+TreeElem::TreeElem(const Elem ElemToInit)
+{
+    this->Key = ElemToInit.Key;
+    this->Value = ElemToInit.Value;
+
+    this->Right = NULL;
+    this->Left = NULL;
+}
+
 //Empty tree initialising
 Tree::Tree()
 {
@@ -236,7 +236,7 @@ Tree::Tree()
 }
 
 //Tree algorithm to get element in binary tree by some key
-Elem Tree::Get(std::string KeyToFind)
+Elem Tree::Get(const std::string KeyToFind)
 {
     TreeElem *tmpNode = Root;
     //Binary tree search
@@ -260,7 +260,7 @@ Elem Tree::Get(std::string KeyToFind)
 }
 
 //Tree algorithm to put element in binary tree
-Elem Tree::Put(struct Elem ElemToPut)
+Elem Tree::Put(const struct Elem ElemToPut)
 {
     if (Root == NULL)
     {
@@ -309,7 +309,7 @@ Elem Tree::Put(struct Elem ElemToPut)
 }
 
 //Tree algorithm to delete any element by some key
-Elem Tree::Del(std::string KeyToDelete)
+Elem Tree::Del(const std::string KeyToDelete)
 {
     TreeElem* tmpNodeCur = Root, *tmpNodePrev = NULL;
     while (tmpNodeCur != NULL)

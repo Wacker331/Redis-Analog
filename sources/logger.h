@@ -6,6 +6,7 @@
 #include <semaphore>
 #include <thread>
 
+//Enumerate level of log messages
 enum LogLevel
 {
     CRITICAL,
@@ -15,6 +16,7 @@ enum LogLevel
     DEBUG
 };
 
+//Structure of logging message
 class LogMessage
 {
     friend class Logger;
@@ -25,10 +27,10 @@ class LogMessage
     std::thread::id TID;
 
 public:
-    LogMessage(LogLevel, std::string);
+    LogMessage(const LogLevel, const std::string);
 };
 
-
+//Logger with its' file, semaphore and queue
 class Logger
 {
     std::ofstream outFile;
@@ -39,11 +41,11 @@ class Logger
     
 public:
     Logger();
-    Logger(std::string);
+    Logger(const std::string);
 
     void LoggerMainThread();
-    Logger& operator<<(LogMessage);
-    Logger& operator<<(std::string);
+    Logger& operator<<(const LogMessage);
+    Logger& operator<<(const std::string);
 };
 
 void InitLogger(Logger *Logs);

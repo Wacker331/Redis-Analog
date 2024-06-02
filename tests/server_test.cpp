@@ -1,6 +1,14 @@
 #include "../sources/server.h"
 #include <gtest/gtest.h>
 
+class Client_Test : public Client
+{
+public:
+    using Client::RequestHandler;
+    using Client::ParseInput;
+    using Client::Client;
+};
+
 TEST(ClientTests, ParseInputTest)
 {
     Tree MainTree;
@@ -8,7 +16,7 @@ TEST(ClientTests, ParseInputTest)
     Logger MainLogger;
     struct sockaddr_in Addr;
     int Sock = 0;
-    Client TestClient(Sock, Addr, MainStorage, MainLogger);
+    Client_Test TestClient(Sock, Addr, MainStorage, MainLogger);
     char buffer[1024];
     strcpy(buffer, "GET key       value\x0A");
     std::vector<std::string> RetVector = TestClient.ParseInput(buffer);
@@ -26,7 +34,7 @@ TEST(ClientTests, HandlerTest)
     Logger MainLogger;
     struct sockaddr_in Addr;
     int Sock = 0;
-    Client TestClient(Sock, Addr, MainStorage, MainLogger);
+    Client_Test TestClient(Sock, Addr, MainStorage, MainLogger);
     Elem TestElem;
     char buffer[1024] = "GET key       value\x0A";
 

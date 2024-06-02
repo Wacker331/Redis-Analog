@@ -13,8 +13,8 @@ void InitClient(Client *NewClient)
     MutexCurrentConnections.unlock();
 }
 
-//Init and bind server to listening socket
-Server::Server(int Port, Storage& InputStorage, Logger& InputLogger, int MaxClients) : MainStorage(InputStorage), Logs(InputLogger)
+//Init and bind server to listening socket with port
+Server::Server(const int Port, Storage& InputStorage, Logger& InputLogger, const int MaxClients) : MainStorage(InputStorage), Logs(InputLogger)
 {
     MaxConnections = MaxClients;
     CurrentConnections = 0;
@@ -38,6 +38,7 @@ Server::Server(int Port, Storage& InputStorage, Logger& InputLogger, int MaxClie
     }
     std::cout << "Server started on " << Port << " port" << std::endl;
     Logs << "Server started on " + std::to_string(Port) + " port";
+    //Starts server
     ServerMainThread();
 }
 
@@ -96,8 +97,8 @@ void Server::ServerMainThread()
 }
 
 //Inits Client class with exact socket
-Client::Client(int InputSocket, struct sockaddr_in InputAddress, Storage& InputStorage, Logger& InputLogger) \
-: MainStorage(InputStorage), Logs(InputLogger)
+Client::Client(const int InputSocket, const struct sockaddr_in InputAddress, Storage& InputStorage,
+                Logger& InputLogger) : MainStorage(InputStorage), Logs(InputLogger)
 {
     Socket = InputSocket;
     Address = InputAddress;
@@ -109,7 +110,7 @@ Client::~Client()
     close(Socket);
 }
 
-//Parsing input string to arguments by ' '
+//Parsing input string from client to arguments by ' '
 std::vector<std::string> Client::ParseInput(char* buffer)
 {
     std::vector<std::string> RetVector;
@@ -197,7 +198,6 @@ int Client::RequestHandler(char* buffer)
             MainStorage.Dump(Arguments[1]);
             Logs << "Storage was dumped";
         }
-
     }
     else 
     {
@@ -225,5 +225,6 @@ void Client::ClientMainThread()
     }
     char TextAddress[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &Address.sin_addr, TextAddress, INET_ADDRSTRLEN);
-    Logs << LogMessage(INFO, std::string("Client ") + TextAddress + ":" + std::to_string(ntohs(Address.sin_port)) + " disconnected");
+    Logs << LogMessage(INFO, std::string("Client ") + TextAddress + ":" \
+                         + std::to_string(ntohs(Address.sin_port)) + " disconnected");
 }

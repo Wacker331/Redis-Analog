@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     int port = 9000;
     int MaxClients = 10;
 
+    //Parse input flags
     for(int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
@@ -50,7 +51,9 @@ int main(int argc, char *argv[])
         }
     }
     Logger MainLogger(LogFileName);
+    //Logger works in separate thread
     std::thread *LoggerThread = new std::thread(InitLogger, &MainLogger);
+
     Server MainServer(port, MainStorage, MainLogger, MaxClients);
     return 0;
 }

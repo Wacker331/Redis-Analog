@@ -1,16 +1,25 @@
 #include <gtest/gtest.h>
 #include "../sources/storage.h"
 
+class Tree_Test : public Tree
+{
+public:
+    using Tree::Get;
+    using Tree::Put;
+    using Tree::Del;
+    using Tree::Tree;
+};
+
 TEST(TreeTests, EmptyTreeTest)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     ASSERT_EQ(MainTree.Get("Key").Value, "");
     ASSERT_EQ(MainTree.Get("Key").Key, "");
 }
 
 TEST(TreeTests, SimplePut)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     Elem ElemToPut("key1", "value1"), RetElem;
 
     RetElem = MainTree.Put(ElemToPut);
@@ -23,7 +32,7 @@ TEST(TreeTests, SimplePut)
 
 TEST(TreeTests, DeleteRoot)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     Elem ElemToPut("key1", "value1"), RetElem;
 
     RetElem = MainTree.Put(ElemToPut);
@@ -43,7 +52,7 @@ TEST(TreeTests, DeleteRoot)
 
 TEST(TreeTests, Delete1Child)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     Elem RetElem;
 
     RetElem = MainTree.Put(Elem("abc", "value1"));
@@ -62,7 +71,7 @@ TEST(TreeTests, Delete1Child)
 
 TEST(TreeTests, Delete2Childs)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     Elem RetElem;
 
     RetElem = MainTree.Put(Elem("bcd", "value1"));
@@ -92,7 +101,7 @@ TEST(TreeTests, Delete2Childs)
 
 TEST(TreeTests, BigTreeTest)
 {
-    Tree MainTree;
+    Tree_Test MainTree;
     Elem RetElem;
 
     RetElem = MainTree.Put(Elem("bcd", "value1"));

@@ -1,10 +1,13 @@
 #include "logger.h"
+
+//Function to start logger in another thread
 void InitLogger(Logger* Logs)
 {
     Logs -> LoggerMainThread();
 }
 
-LogMessage::LogMessage(LogLevel InputLevel, std::string InputMsg)
+//Creates logging message with timestamp and PID with TID
+LogMessage::LogMessage(const LogLevel InputLevel, const std::string InputMsg)
 {
     Timestamp = time(nullptr);
     Level = InputLevel;
@@ -13,35 +16,38 @@ LogMessage::LogMessage(LogLevel InputLevel, std::string InputMsg)
     TID = std::this_thread::get_id();
 }
 
+//Creates log file by default name
 Logger::Logger() : Logger::Logger("RedisLogs")
 {
     
 }
 
-Logger::Logger(std::string InputFileName)
+//Inits log file
+Logger::Logger(const std::string InputFileName)
 {
     FileName = InputFileName;
     //Clear previous file
     outFile.open(FileName, std::ios::out);
     outFile.close();
     *this << "Logger inited";
-
-    // std::thread Thread(InitLogger, this);
 }
 
-Logger& Logger::operator<<(LogMessage InputLog)
+//Puts log message in queue and signal through semaphore to another thread
+Logger& Logger::operator<<(const LogMessage InputLog)
 {
     LogQueue.push(InputLog);
     LogSemaphore.release();
     return *this;
 }
 
-Logger& Logger::operator<<(std::string InputMsg)
+//Create message by string with default level "INFO"
+Logger& Logger::operator<<(const std::string InputMsg)
 {
     *this << LogMessage(INFO, InputMsg);
     return *this;
 }
 
+//Main thread of logger. Waiting for semaphore and writes logs to file in format
 void Logger::LoggerMainThread()
 {
     outFile.open(FileName, std::ios::app);
